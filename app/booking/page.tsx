@@ -21,7 +21,7 @@ const BookingPage = () => {
   useEffect(() => {
     const fetchBookedSeats = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/seat/get-all');
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/seat/get-all`);
         const seatData = res.data;
         const booked = seatData.map((s: any) => s.seat_number);
         setBookedSeats(booked);
@@ -95,7 +95,7 @@ const BookingPage = () => {
     };
 
     try {
-      const res = await axios.post('http://localhost:5000/api/seat/create', payload);
+      const res = await axios.post('${process.env.NEXT_PUBLIC_API_URL}/api/seat/create', payload);
       const newBooked = seatsToBook.map((s) => s.seatNumber);
       setBookedSeats((prev) => [...prev, ...newBooked]);
       setAllocatedSeats(seatsToBook);
@@ -115,7 +115,7 @@ const BookingPage = () => {
       // Call DELETE API for each seat
       await Promise.all(
         seatNumbers.map((seatNumber) =>
-          axios.delete('http://localhost:5000/api/seat/delete', {
+          axios.delete('${process.env.NEXT_PUBLIC_API_URL}/api/seat/delete', {
             data: { userId, seatNumber },
           })
         )
@@ -137,7 +137,7 @@ const BookingPage = () => {
     if (!seatToDelete || !userId) return;
 
     try {
-      await axios.delete('http://localhost:5000/api/seat/delete', {
+      await axios.delete('${process.env.NEXT_PUBLIC_API_URL}/api/seat/delete', {
         data: { userId, seatNumber },
       });
 
