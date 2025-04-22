@@ -57,20 +57,36 @@ const BookingPage = () => {
       (seat) => !bookedSeats.includes(seat.seatNumber)
     );
 
-    // Priority 1: Same row
-    for (let row = 1; row <= ROWS; row++) {
-      const rowSeats = availableSeats.filter((s) => s.row === row);
-      rowSeats.sort((a, b) => a.col - b.col);
-      for (let i = 0; i <= rowSeats.length - numSeats; i++) {
-        const group = rowSeats.slice(i, i + numSeats);
-        if (group.length === numSeats) return group;
+   // 1️⃣ Try to find seats in the same row
+  for (let row = 1; row <= ROWS; row++) {
+    const rowSeats = availableSeats.filter((s) => s.row === row).sort((a, b) => a.col - b.col);
+    for (let i = 0; i <= rowSeats.length - numSeats; i++) {
+      const group = rowSeats.slice(i, i + numSeats);
+      const isContinuous = group.every((s, idx) =>
+        idx === 0 || s.col === group[idx - 1].col + 1
+      );
+      if (isContinuous) return group;
+    }
+  }
+
+  // 2️⃣ Try adjacent rows (example: 3 in row 4, 2 in row 5)
+  for (let row = 1; row < ROWS; row++) {
+    const row1 = availableSeats.filter(s => s.row === row).sort((a, b) => a.col - b.col);
+    const row2 = availableSeats.filter(s => s.row === row + 1).sort((a, b) => a.col - b.col);
+    for (let i = 1; i < numSeats; i++) {
+      const part1 = row1.slice(0, i);
+      const part2 = row2.slice(0, numSeats - i);
+      if (part1.length === i && part2.length === (numSeats - i)) {
+        return [...part1, ...part2];
       }
     }
+  }
 
-    // Fallback
-    if (availableSeats.length >= numSeats) {
-      return availableSeats.slice(0, numSeats);
-    }
+  // 3️⃣ Final fallback - pick first N available seats (last resort)
+  if (availableSeats.length >= numSeats) {
+    return availableSeats.slice(0, numSeats);
+  }
+
 
     return [];
   };
